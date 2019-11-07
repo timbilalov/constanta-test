@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<title>Constanta test</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="./app.css">
+	</head>
+	<body>
+		<!--
+			TODO: Правильно было бы, конечно,
+			разбить на компоненты,
+			подключить роутинг, транспайлинг, и т. д.
+		-->
+		<div id="app">
+			<template v-if="currentView === 'cart'">
+				Cart
+				<br/><br/>
+
+				<div class="list-wrapper">
+					<table cellpadding="7" cellspacing="3">
+						<thead>
+							<tr>
+								<th>name</th>
+								<th>
+									cost_in_credits
+								</th>
+								<th>buy</th>
+							</tr>
+						</thead>
+						<tbody>
+							<template v-for="item in itemsInCart">
+								<tr>
+									<td>{{ item.name }}</td>
+									<td>{{ item.cost_in_credits }}</td>
+									<td>
+										<button @click.stop="toggleInCart(item)">{{ itemsInCart.indexOf(item) >= 0 ? 'Remove' : 'Buy' }}</button>
+									</td>
+								</tr>
+							</template>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th>&nbsp;</th>
+								<th>
+									Total cost: {{ totalCost }}
+								</th>
+								<th>
+									<button @click="showPopup = true">Buy all</button>
+								</th>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</template>
+
+			<template v-else>
+				<div class="cart-button">
+					<button @click="currentView = 'cart'">Cart ({{ itemsInCart.length }})</button>
+				</div>
+
+				<input type="search" v-model="searchText" placeholder="Search by text">
+				<br/><br/>
+
+				<template v-if="collection.length > 0">
+					<button :disabled="!sort" @click="clearSort">Clear sort</button>
+
+					<div class="list-wrapper">
+						<table cellpadding="7" cellspacing="3">
+							<thead>
+								<tr>
+									<th>name</th>
+									<th @click="toggleSort('cost_in_credits')" style="cursor: pointer;">
+										cost_in_credits
+										<template v-if="sort && sort.prop === 'cost_in_credits'">
+											<template v-if="sort.dir === 'asc'">↑</template>
+											<template v-else>↓</template>
+										</template>
+									</th>
+									<th @click="toggleSort('hyperdrive_rating')" style="cursor: pointer;">
+										hyperdrive_rating
+										<template v-if="sort && sort.prop === 'hyperdrive_rating'">
+											<template v-if="sort.dir === 'asc'">↑</template>
+											<template v-else>↓</template>
+										</template>
+									</th>
+									<th @click="toggleSort('starship_class')" style="cursor: pointer;">
+										starship_class
+										<template v-if="sort && sort.prop === 'starship_class'">
+											<template v-if="sort.dir === 'asc'">↑</template>
+											<template v-else>↓</template>
+										</template>
+									</th>
+									<th>
+										Cart
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<template v-for="item in collectionSorted">
+									<tr @click="toggleActiveItem(item)" style="cursor: pointer;">
+										<td>{{ item.name }}</td>
+										<td>{{ item.cost_in_credits }}</td>
+										<td>{{ item.hyperdrive_rating }}</td>
+										<td>{{ item.starship_class }}</td>
+										<td>
+											<button @click.stop="toggleInCart(item)">{{ itemsInCart.indexOf(item) >= 0 ? 'Remove' : 'Buy' }}</button>
+										</td>
+									</tr>
+									<tr v-show="activeItems.indexOf(item) >= 0">
+										<td colspan="5">
+											Details:
+											<br/><br/>
+											<div v-for="(value, key) in item">
+												<b>{{ key }}:</b> {{ value }}
+											</div>
+										</td>
+									</tr>
+								</template>
+							</tbody>
+						</table>
+					</div>
+				</template>
+
+				<template v-else-if="fetching">
+					Fetching data...
+				</template>
+
+				<template v-else>
+					No data
+				</template>
+			</template>
+
+			<template v-if="showPopup">
+				<div class="popup">
+					<div class="popup__bg" @click="showPopup = false"></div>
+					<div class="popup__fg">
+						<div class="popup__content">
+							<form @submit.prevent="submitForm">
+								<div>
+									Имя: <input type="text" name="name">
+								</div>
+								<div>
+									Раса: <input type="text" name="race">
+								</div>
+								<div>
+									Дата доставки: <input type="date" name="date">
+								</div>
+								<div>
+									<button type="submit">Оплатить</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</template>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+		<script src="./app.js"></script>
+	</body>
+</html>
